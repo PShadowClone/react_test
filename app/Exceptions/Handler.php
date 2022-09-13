@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
@@ -38,24 +39,26 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->reportable(function (Throwable $e) {
+        });
+        /**
+         * handle the validation exception
+         */
+        $this->renderable(function (ValidationException $e, $request) {
+            $payload = $e->errors();
+            $code = 422;
+            $message = $e->getMessage();
+            return response()->api($code, $message, $payload);
+        });
+        /**
+         * handle the common exceptions
+         */
+        $this->renderable(function (Throwable $e, $request) {
+            $this->shouldReport($e);
 
+            $message = $e->getMessage();
+            $code = 500;
+            return response()->api($code, $message);
         });
     }
 
-    /**
-     * @param $request
-     * @param Throwable $e
-     * @return \Illuminate\Http\JsonResponse|Response|\Symfony\Component\HttpFoundation\Response
-     */
-    public function render($request, Throwable $e)
-    {
-        $message = $e->getMessage();
-        $payload = [];
-        $code = 500;
-        if ($e instanceof ValidationException) {
-            $payload = $e->errors();
-            $code = 422;
-        }
-        return response()->api($code, $message, $payload);
-    }
 }

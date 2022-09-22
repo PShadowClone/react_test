@@ -22,4 +22,5 @@ Route::group(['prefix' => 'users'] , function(){
     Route::get('/' , [\App\Http\Controllers\UserController::class ,'index']);
     Route::get('/{user}' , [\App\Http\Controllers\UserController::class ,'show']);
     Route::match(['POST' , 'PUT' , 'PATCH'],'/{user}' , [\App\Http\Controllers\UserController::class ,'update']);
+    Route::delete('/{user}' , [\App\Http\Controllers\UserController::class ,'destroy']);
 });
